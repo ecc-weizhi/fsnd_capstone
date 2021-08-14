@@ -33,7 +33,7 @@ def delete(movie_id):
     try:
         movie = Movie.query.filter_by(id=movie_id).first()
         if not movie:
-            raise NotFound("questions", movie_id)
+            raise NotFound("Movie", movie_id)
         movie.delete()
         db.session.commit()
         is_success = True
@@ -93,4 +93,42 @@ def post():
 
 @movies_blueprint.route("/<int:movie_id>", methods=['PATCH'])
 def patch(movie_id):
-    pass
+    movie = Movie.query.filter_by(id=movie_id).first()
+    if not movie:
+        raise NotFound("Movie", movie_id)
+
+    data_string = request.data
+    try:
+        request_json = json.loads(data_string)
+    except JSONDecodeError:
+        raise BadRequest()
+
+    # error checking
+    field_title = request_json.get("title", None)
+    field_release_date = request_json.get("release_date", None)
+
+    missing_field = []
+    if not field_title:
+        missing_field.append("title")
+    if not field_release_date:
+        missing_field.append("release_date")
+
+    if missing_field:
+        raise UnprocessableEntity(missing_field)
+
+    movie.title = field_title
+    movie.release_date = field_release_date
+
+    try:
+        db.session.commit()
+        is_success = True
+    except SQLAlchemyError:
+        is_success = False
+
+    if is_success:
+        return jsonify({
+            "success": is_success,
+            "movie": movie.format(),
+        })
+    else:
+        abort(500)

@@ -33,7 +33,7 @@ def delete(actor_id):
     try:
         actor = Actor.query.filter_by(id=actor_id).first()
         if not actor:
-            raise NotFound("questions", actor_id)
+            raise NotFound("Actor", actor_id)
         actor.delete()
         db.session.commit()
         is_success = True
@@ -97,4 +97,46 @@ def post():
 
 @actors_blueprint.route("/<int:actor_id>", methods=["PATCH"])
 def patch(actor_id):
-    pass
+    actor = Actor.query.filter_by(id=actor_id).first()
+    if not actor:
+        raise NotFound("Actor", actor_id)
+
+    data_string = request.data
+    try:
+        request_json = json.loads(data_string)
+    except JSONDecodeError:
+        raise BadRequest()
+
+    # error checking
+    field_name = request_json.get("name", None)
+    field_age = request_json.get("age", None)
+    field_gender = request_json.get("gender", None)
+
+    missing_field = []
+    if not field_name:
+        missing_field.append("name")
+    if not field_age:
+        missing_field.append("age")
+    if not field_gender:
+        missing_field.append("gender")
+
+    if missing_field:
+        raise UnprocessableEntity(missing_field)
+
+    actor.name = field_name
+    actor.age = field_age
+    actor.gender = field_gender
+
+    try:
+        db.session.commit()
+        is_success = True
+    except SQLAlchemyError:
+        is_success = False
+
+    if is_success:
+        return jsonify({
+            "success": is_success,
+            "actor": actor.format(),
+        })
+    else:
+        abort(500)
