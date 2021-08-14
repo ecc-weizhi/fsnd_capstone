@@ -5,6 +5,7 @@ from models.actor import Actor
 actors_blueprint = Blueprint("actors", __name__, url_prefix="/actors")
 ACTOR_PAGE_SIZE = 10
 
+
 @actors_blueprint.route("")
 def get():
     page = request.args.get('page', 1, type=int)
