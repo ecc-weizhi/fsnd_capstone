@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify, abort
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.client_error_exception import BadRequest, UnprocessableEntity, NotFound
+from auth.auth import requires_auth
 from models import db
 from models.actor import Actor
 
@@ -13,6 +14,7 @@ ACTOR_PAGE_SIZE = 10
 
 
 @actors_blueprint.route("")
+@requires_auth("get:actors")
 def get():
     page = request.args.get('page', 1, type=int)
 
@@ -29,6 +31,7 @@ def get():
 
 
 @actors_blueprint.route("/<int:actor_id>", methods=["DELETE"])
+@requires_auth("delete:actors")
 def delete(actor_id):
     try:
         actor = Actor.query.filter_by(id=actor_id).first()
@@ -50,6 +53,7 @@ def delete(actor_id):
 
 
 @actors_blueprint.route("", methods=["POST"])
+@requires_auth("post:actors")
 def post():
     data_string = request.data
     try:
@@ -96,6 +100,7 @@ def post():
 
 
 @actors_blueprint.route("/<int:actor_id>", methods=["PATCH"])
+@requires_auth("patch:actors")
 def patch(actor_id):
     actor = Actor.query.filter_by(id=actor_id).first()
     if not actor:

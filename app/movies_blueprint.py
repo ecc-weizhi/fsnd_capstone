@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify, abort
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.client_error_exception import BadRequest, UnprocessableEntity, NotFound
+from auth.auth import requires_auth
 from models import db
 from models.movie import Movie
 
@@ -13,6 +14,7 @@ MOVIE_PAGE_SIZE = 10
 
 
 @movies_blueprint.route("")
+@requires_auth("get:movies")
 def get():
     page = request.args.get('page', 1, type=int)
 
@@ -29,6 +31,7 @@ def get():
 
 
 @movies_blueprint.route("/<int:movie_id>", methods=['DELETE'])
+@requires_auth("delete:movies")
 def delete(movie_id):
     try:
         movie = Movie.query.filter_by(id=movie_id).first()
@@ -50,6 +53,7 @@ def delete(movie_id):
 
 
 @movies_blueprint.route("", methods=['POST'])
+@requires_auth("post:movies")
 def post():
     data_string = request.data
     try:
@@ -92,6 +96,7 @@ def post():
 
 
 @movies_blueprint.route("/<int:movie_id>", methods=['PATCH'])
+@requires_auth("patch:movies")
 def patch(movie_id):
     movie = Movie.query.filter_by(id=movie_id).first()
     if not movie:
