@@ -4,7 +4,7 @@ from json import JSONDecodeError
 from flask import Blueprint, request, jsonify, abort
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.client_error_exception import BadRequest, UnprocessableEntity
+from app.client_error_exception import BadRequest, UnprocessableEntity, NotFound
 from models import db
 from models.movie import Movie
 
@@ -30,7 +30,23 @@ def get():
 
 @movies_blueprint.route("/<int:movie_id>", methods=['DELETE'])
 def delete(movie_id):
-    pass
+    try:
+        movie = Movie.query.filter_by(id=movie_id).first()
+        if not movie:
+            raise NotFound("questions", movie_id)
+        movie.delete()
+        db.session.commit()
+        is_success = True
+    except SQLAlchemyError:
+        is_success = False
+
+    if is_success:
+        return jsonify({
+            "success": is_success,
+            "deleted_id": movie_id
+        })
+    else:
+        abort(500)
 
 
 @movies_blueprint.route("", methods=['POST'])
