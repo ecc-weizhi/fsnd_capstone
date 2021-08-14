@@ -17,6 +17,10 @@ class Movie(db.Model):
                f"title:{self.title}, " \
                f"release_date:{self.release_date}>"
 
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
     def format(self):
         return {
             'id': self.id,
