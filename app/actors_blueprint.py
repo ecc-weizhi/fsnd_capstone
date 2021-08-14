@@ -1,5 +1,11 @@
-from flask import Blueprint, request, jsonify
+import json
+from json import JSONDecodeError
 
+from flask import Blueprint, request, jsonify, abort
+from sqlalchemy.exc import SQLAlchemyError
+
+from app.client_error_exception import BadRequest, UnprocessableEntity
+from models import db
 from models.actor import Actor
 
 actors_blueprint = Blueprint("actors", __name__, url_prefix="/actors")
@@ -29,7 +35,48 @@ def delete(actor_id):
 
 @actors_blueprint.route("", methods=["POST"])
 def post():
-    pass
+    data_string = request.data
+    try:
+        request_json = json.loads(data_string)
+    except JSONDecodeError:
+        raise BadRequest()
+
+    # error checking
+    field_name = request_json.get("name", None)
+    field_age = request_json.get("age", None)
+    field_gender = request_json.get("gender", None)
+
+    missing_field = []
+    if not field_name:
+        missing_field.append("name")
+    if not field_age:
+        missing_field.append("age")
+    if not field_gender:
+        missing_field.append("gender")
+
+    if missing_field:
+        raise UnprocessableEntity(missing_field)
+
+    actor = Actor(
+        field_name,
+        field_age,
+        field_gender,
+    )
+
+    try:
+        db.session.add(actor)
+        db.session.commit()
+        is_success = True
+    except SQLAlchemyError:
+        is_success = False
+
+    if is_success:
+        return jsonify({
+            "success": is_success,
+            "actor": actor.format(),
+        })
+    else:
+        abort(500)
 
 
 @actors_blueprint.route("/<int:actor_id>", methods=["PATCH"])
