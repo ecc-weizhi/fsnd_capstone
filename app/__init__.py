@@ -4,6 +4,7 @@ from app.actors_blueprint import actors_blueprint
 from app.client_error_exception import ClientErrorException
 from app.error_handler import ErrorHandler
 from app.movies_blueprint import movies_blueprint
+from auth.auth import AuthError
 from models import db
 
 app = Flask(__name__)
@@ -26,3 +27,8 @@ def client_error(error):
 @app.errorhandler(500)
 def internal_server_error(error):
     return error_handler.handle_internal_server_error(error)
+
+
+@app.errorhandler(AuthError)
+def auth_error(error):
+    return error_handler.handle_auth_error(error)
