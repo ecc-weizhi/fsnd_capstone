@@ -141,6 +141,78 @@ class CastingCouchTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
 
+    def test_get_movies_success(self):
+        res = self.client().get('/movies', headers=CASTING_ASSISTANT_HEADERS)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['movies'])
+        self.assertEqual(len(data['movies']), 2)
+
+    def test_no_permission_get_movies_fail(self):
+        res = self.client().get('/movies')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(data['success'], False)
+
+    def test_delete_movie_success(self):
+        res = self.client().delete('/movies/1', headers=EXECUTIVE_PRODUCER_HEADERS)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['deleted_id'], 1)
+
+    def test_id_not_exist_delete_movie_fail(self):
+        res = self.client().delete('/movies/10', headers=EXECUTIVE_PRODUCER_HEADERS)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+
+    def test_add_movie_success(self):
+        res = self.client().post('/movies', json={
+            "title": "Inception",
+            "release_date": datetime.utcnow(),
+        }, headers=EXECUTIVE_PRODUCER_HEADERS)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['movie'])
+
+    def test_missing_field_add_movie_fail(self):
+        res = self.client().post('/movies', json={
+            "release_date": datetime.utcnow(),
+        }, headers=EXECUTIVE_PRODUCER_HEADERS)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+
+    def test_patch_movie_success(self):
+        res = self.client().patch('/movies/1', json={
+            "title": "Harry Potter",
+            "release_date": datetime.utcnow(),
+        }, headers=CASTING_DIRECTOR_HEADERS)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['movie'])
+
+    def test_id_not_exist_patch_movie_fail(self):
+        res = self.client().patch('/movies/10', json={
+            "title": "Inception",
+            "release_date": datetime.utcnow(),
+        }, headers=CASTING_DIRECTOR_HEADERS)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
