@@ -1,4 +1,5 @@
 import json
+import os
 import unittest
 from datetime import datetime
 from urllib.parse import urlencode
@@ -10,14 +11,14 @@ from models.actor import Actor
 from models.movie import Movie
 
 TEST_DB_PATH = "postgresql://weizhi:test1234@localhost:5432/castingcouch_test"
-CASTING_ASSISTANT_USERNAME = ""
-CASTING_ASSISTANT_PASSWORD = ""
-CASTING_DIRECTOR_USERNAME = ""
-CASTING_DIRECTOR_PASSWORD = ""
-EXECUTIVE_PRODUCER_USERNAME = ""
-EXECUTIVE_PRODUCER_PASSWORD = ""
-CLIENT_ID = ""
-CLIENT_SECRET = ""
+CASTING_ASSISTANT_USERNAME = os.environ.get("CASTING_ASSISTANT_USERNAME", None)
+CASTING_ASSISTANT_PASSWORD = os.environ.get("TEST_ACCOUNT_PASSWORD", None)
+CASTING_DIRECTOR_USERNAME = os.environ.get("CASTING_DIRECTOR_USERNAME", None)
+CASTING_DIRECTOR_PASSWORD = os.environ.get("TEST_ACCOUNT_PASSWORD", None)
+EXECUTIVE_PRODUCER_USERNAME = os.environ.get("EXECUTIVE_PRODUCER_USERNAME", None)
+EXECUTIVE_PRODUCER_PASSWORD = os.environ.get("TEST_ACCOUNT_PASSWORD", None)
+CLIENT_ID = os.environ.get("CLIENT_ID", None)
+CLIENT_SECRET = os.environ.get("CLIENT_SECRET", None)
 
 
 class CastingCouchTestCase(unittest.TestCase):
@@ -28,7 +29,7 @@ class CastingCouchTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        url = 'https://eccweizhi-fsnd.us.auth0.com/oauth/token'
+        url = "https://eccweizhi-fsnd.us.auth0.com/oauth/token"
         post_fields = {
             "grant_type": "password",
             "audience": "myFoobar",
