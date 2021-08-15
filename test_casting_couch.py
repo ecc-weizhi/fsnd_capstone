@@ -81,6 +81,28 @@ class CastingCouchTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 401)
         self.assertEqual(data['success'], False)
 
+    def test_add_actors_success(self):
+        res = self.client().post('/actors', json={
+            "name": "Charlie",
+            "age": 45,
+            "gender": "F"
+        }, headers=CASTING_DIRECTOR_HEADERS)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['actor'])
+
+    def test_missing_field_add_actors_fail(self):
+        res = self.client().post('/actors', json={
+            "age": 45,
+            "gender": "F"
+        }, headers=CASTING_DIRECTOR_HEADERS)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
