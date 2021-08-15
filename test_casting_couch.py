@@ -213,6 +213,66 @@ class CastingCouchTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
 
+    def test_casting_assistant_can_get_movies(self):
+        res = self.client().get('/movies', headers=CASTING_ASSISTANT_HEADERS)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['movies'])
+        self.assertEqual(len(data['movies']), 2)
+
+    def test_casting_assistant_cannot_add_movie(self):
+        res = self.client().post('/movies', json={
+            "title": "Inception",
+            "release_date": datetime.utcnow(),
+        }, headers=CASTING_ASSISTANT_HEADERS)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data['success'], False)
+
+    def test_casting_director_can_add_actor(self):
+        res = self.client().post('/actors', json={
+            "name": "Charlie",
+            "age": 45,
+            "gender": "F"
+        }, headers=CASTING_DIRECTOR_HEADERS)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['actor'])
+
+    def test_casting_director_cannot_add_movie(self):
+        res = self.client().post('/movies', json={
+            "title": "Inception",
+            "release_date": datetime.utcnow(),
+        }, headers=CASTING_DIRECTOR_HEADERS)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(data['success'], False)
+
+    def test_executive_producer_can_add_movie(self):
+        res = self.client().post('/movies', json={
+            "title": "Inception",
+            "release_date": datetime.utcnow(),
+        }, headers=EXECUTIVE_PRODUCER_HEADERS)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['movie'])
+
+    def test_executive_producer_can_delete_movie(self):
+        res = self.client().delete('/movies/1', headers=EXECUTIVE_PRODUCER_HEADERS)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['deleted_id'], 1)
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
