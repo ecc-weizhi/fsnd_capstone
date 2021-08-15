@@ -5,30 +5,28 @@ from app.client_error_exception import ClientErrorException
 from app.error_handler import ErrorHandler
 from app.movies_blueprint import movies_blueprint
 from auth.auth import AuthError
-from models import db
-
-app = Flask(__name__)
-
-app.register_blueprint(actors_blueprint)
-app.register_blueprint(movies_blueprint)
-
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://weizhi:test1234@localhost:5432/castingcouch"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-db.init_app(app)
-
-error_handler = ErrorHandler()
+from models import setup_db
 
 
-@app.errorhandler(ClientErrorException)
-def client_error(error):
-    return error_handler.handle_client_error(error)
+def create_app(test_config=None):
+    app = Flask(__name__)
 
+    app.register_blueprint(actors_blueprint)
+    app.register_blueprint(movies_blueprint)
 
-@app.errorhandler(500)
-def internal_server_error(error):
-    return error_handler.handle_internal_server_error(error)
+    setup_db(app)
+    err_handler = ErrorHandler()
 
+    @app.errorhandler(ClientErrorException)
+    def client_error(error):
+        return err_handler.handle_client_error(error)
 
-@app.errorhandler(AuthError)
-def auth_error(error):
-    return error_handler.handle_auth_error(error)
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        return err_handler.handle_internal_server_error(error)
+
+    @app.errorhandler(AuthError)
+    def auth_error(error):
+        return err_handler.handle_auth_error(error)
+
+    return app
