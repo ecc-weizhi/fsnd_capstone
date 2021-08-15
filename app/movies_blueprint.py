@@ -26,7 +26,7 @@ def get():
 
     return jsonify({
         "success": True,
-        "actors": formatted_movies[start_index_inclusive:end_index_exclusive],
+        "movies": formatted_movies[start_index_inclusive:end_index_exclusive],
     })
 
 
