@@ -17,6 +17,10 @@ def create_app(test_config=None):
     setup_db(app)
     err_handler = ErrorHandler()
 
+    @app.route("/")
+    def root():
+        return "Hello world"
+
     @app.errorhandler(ClientErrorException)
     def client_error(error):
         return err_handler.handle_client_error(error)
