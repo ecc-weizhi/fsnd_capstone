@@ -80,9 +80,9 @@ class CastingCouchTestCase(unittest.TestCase):
         with self.app.app_context():
             # create all tables
             db.create_all()
-            self._initialize_db()
+            self._populate_db()
 
-    def _initialize_db(self):
+    def _populate_db(self):
         self._insert_actor("Ash", "25", "M")
         self._insert_actor("Bob", "35", "F")
         self._insert_movie("Hobbit", datetime.utcnow())
