@@ -1,4 +1,6 @@
-from flask import Flask
+import os
+
+from flask import Flask, send_from_directory
 
 from app.actors_blueprint import actors_blueprint
 from app.client_error_exception import ClientErrorException
@@ -19,7 +21,15 @@ def create_app(test_config=None):
 
     @app.route("/")
     def root():
-        return "Hello world"
+        host = "https://fsnd-capstone-weizhi.herokuapp.com" \
+            if os.environ.get("IS_HEROKU", None) else "http://127.0.0.1:5000"
+
+        auth0_login_url = f"https://eccweizhi-fsnd.us.auth0.com/authorize?audience=myFoobar&response_type=token&client_id=5IBYZMcKkw8WfZOBHxtfpvczvBK7Szms&redirect_uri={host}/login-result"
+        return f'<html><body><a href="{auth0_login_url}">Login auth0</a></body></html>'
+
+    @app.route("/login-result")
+    def login_result():
+        return send_from_directory("../static", "login_result.html")
 
     @app.errorhandler(ClientErrorException)
     def client_error(error):

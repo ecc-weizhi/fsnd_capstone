@@ -1,0 +1,19 @@
+<html>
+<body>
+<h1>Token:</h1>
+<div id="token"></div>
+<script>
+        if(window.location.hash) {
+            let hash = window.location.hash.substring(1);
+            let arr = hash.split("&");
+            for (let i = 0; i < arr.length; i++) {
+                if(arr[i].startsWith('access_token=')){
+                    document.getElementById("token").innerHTML = arr[i].split("access_token=")[1];
+                    break;
+                }
+            }
+        }
+
+</script>
+</body>
+</html>
